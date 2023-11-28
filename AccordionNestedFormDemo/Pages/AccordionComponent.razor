@@ -1,0 +1,72 @@
+﻿@using Bogus;
+<DxAccordion AnimationType="LayoutAnimationType.Slide" CssClass="h-100" ExpandMode="DevExpress.Blazor.AccordionExpandMode.SingleOrNone">
+    <Items>
+        @{
+
+            foreach (var drow in transactionsList.OrderByDescending(x => x.DatePosted))
+            {
+                <DxAccordionItem Context="aiContext" ExpandedChanged="@ExpandedItem">
+                    <HeaderTextTemplate>
+                        <div class="container text-start ms-2">
+                            <div class="row">
+
+                                <div class="col-md-3 col-sm-2">
+                                    <span>@((drow.DatePosted).ToString("MM/dd/yyyy"))</span>
+                                </div>
+
+                            </div>
+                        </div>
+                    </HeaderTextTemplate>
+                    <ContentTemplate Context="bodyContext">
+                        <DxFormLayout @ref="formRef" CssClass="m-2" Data="@drow">
+                            <DxFormLayoutItem Caption="Descripcion" ColSpanMd="4" Field="@nameof(mdl_BankTransactions.Description)">
+                                <DxTextBox Text="@drow.Description" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Merchant" ColSpanMd="4" Field="@nameof(mdl_BankTransactions.Merchant)">
+                                <DxTextBox Text="@drow.Merchant" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="TransactionType" ColSpanMd="4" Field="@nameof(mdl_BankTransactions.TransType)">
+                                <DxTextBox Text="@drow.TransType" />
+                            </DxFormLayoutItem>
+                            <DxFormLayoutItem Caption="Amount" ColSpanMd="4" Field="@nameof(mdl_BankTransactions.Amount)">
+                                <DxSpinEdit Value="@drow.Amount" />
+                            </DxFormLayoutItem>
+                        </DxFormLayout>
+
+                    </ContentTemplate>
+                </DxAccordionItem>
+            }
+        }
+
+    </Items>
+</DxAccordion>
+@code {
+    List<mdl_BankTransactions> transactionsList = new List<mdl_BankTransactions>();
+    DxFormLayout formRef;
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+        var transactionFaker = new Faker<mdl_BankTransactions>()
+            .RuleFor(t => t.DatePosted, f => f.Date.Recent())
+            .RuleFor(t => t.TransType, f => f.Finance.TransactionType())
+            .RuleFor(t => t.Merchant, f => f.Company.CompanyName())
+            .RuleFor(t => t.Amount, f => f.Finance.Amount())
+            .RuleFor(t => t.Description, f => f.Lorem.Sentence());
+        transactionsList = transactionFaker.Generate(10);
+    }
+    void ExpandedItem(bool e)
+    {
+        if (e)
+        {
+            var test = formRef?.Data;
+        }
+    }
+    public class mdl_BankTransactions
+    {
+        public DateTime DatePosted { get; set; }
+        public string TransType { get; set; }
+        public string Merchant { get; set; }
+        public decimal Amount { get; set; }
+        public string Description { get; set; }
+    }
+}
